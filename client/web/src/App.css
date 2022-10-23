@@ -1,0 +1,25 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.normalize__link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.leaflet-container {
+  height: 50vh;
+  width: inherit;
+}
+
+.Container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+textarea {
+  resize: none !important;
+  overflow: hidden;
+}
