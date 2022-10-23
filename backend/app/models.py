@@ -38,5 +38,6 @@ class Dump(db.Model):
     longitude = db.Column(db.String(16))
     latitude = db.Column(db.String(16))
     description = db.Column(db.Text())
+    status = db.Column(db.Integer, default=0)
 
     users = relationship("User", secondary=user_dump, back_populates="dumps")
