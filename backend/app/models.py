@@ -7,13 +7,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Integer, String, \
     Column, DateTime, ForeignKey, Numeric, Boolean
 
-
 Base = declarative_base()
 
 user_dump = Table('user_dump', Base.metadata,
-                    Column('user_id', ForeignKey("user.id")),
-                    Column('dump_id', ForeignKey("dump.id"))
-                    )
+                  Column('user_id', ForeignKey("user.id")),
+                  Column('dump_id', ForeignKey("dump.id"))
+                  )
 
 
 class User(db.Model):
