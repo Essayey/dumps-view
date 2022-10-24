@@ -1,6 +1,6 @@
 from werkzeug.datastructures import FileStorage
 from flask_restful import Resource, reqparse
-from app.models import Dump
+from app.models import Dump, User
 from flask import jsonify, make_response
 
 
@@ -15,15 +15,27 @@ class DumpResource(Resource):
 
     def post(self, dump_id):
         """Создаёт свалку"""
-        # self.parser.add_argument('name', type=str, default='xxx', location='args')
-        # self.parser.add_argument('name2', type=str, default='yyy', location='args')
+        self.parser.add_argument('lng', type=str, default='xxx', location='args')
+        self.parser.add_argument('lat', type=str, default='yyy', location='args')
+        self.parser.add_argument('description', type=str, location='args')
+        self.parser.add_argument('user_id', type=int, location='args')
         self.parser.add_argument('photo', type=FileStorage, location='files')
         args = self.parser.parse_args()
+        new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'])
 
         if file := args['photo']:
             file.save(f'app/static/dumps/{dump_id}.jpg')
 
-        return make_response(jsonify({'res': True}), 201)
+        try:
+            db.session.add(new_dump)
+            db.session.commit()
+            user = User.query.filter_by(id=args['user_id']).first()
+            user.dumps.append(new_dump)
+            db.session.commit()
+            return make_response(jsonify({'res': True}), 201)
+
+        except:
+            return {'message': 'Something went wrong'}, 500
 
 
 class DumpListResource(Resource):
