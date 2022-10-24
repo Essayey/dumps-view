@@ -10,11 +10,12 @@
 }
 
 .leaflet-container {
-  height: 50vh;
+  height: 500px;
   width: inherit;
 }
 
 .Container {
+  padding: 0 10px;
   max-width: 1000px;
   margin: 0 auto;
 }

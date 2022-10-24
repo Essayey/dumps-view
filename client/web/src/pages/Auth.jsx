@@ -45,7 +45,13 @@ const Auth = () => {
                     className='d-flex justify-content-center align-items-center'
                 >
                     <Card style={{ width: '20rem' }} className='p-3'>
-                        <h2 className='m-auto'>Регистрация</h2>
+                        <h2 className='m-auto'>
+                            {isRegistration
+                                ? 'Регистрация'
+                                : 'Авторизация'
+                            }
+
+                        </h2>
                         <Form onSubmit={e => handleSubmit(e)}>
                             <Form.Control
                                 className='mt-3'
