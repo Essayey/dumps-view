@@ -1,14 +1,14 @@
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-from flask import Flask
+from functools import wraps
+from flask import Flask, session, jsonify
 from flask_json import FlaskJSON
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
 from flask_restful import Api
-from flask_jwt_extended import JWTManager
-
+from flask_jwt_extended import JWTManager, jwt_required
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -57,7 +57,20 @@ def create_app(config_class=Config):
 
 
 from app import models
+
+
 # @jwt.token_in_blocklist_loader()
 # def check_if_token_in_blacklist(decrypted_token):
 #     jti = decrypted_token['jti']
 #     return models.RevokedTokenModel.is_jti_blacklisted(jti)
+
+def access_required(role="ANY"):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if role == "ANY" or (session.get("role") is None and role == "ANY") or session.get("role") == role:
+                return fn(*args, **kwargs)
+            else:
+                return jsonify({'message': 'denied'})
+        return decorated_view
+    return wrapper
