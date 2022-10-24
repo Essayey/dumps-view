@@ -66,6 +66,8 @@ class Dump(db.Model):
 
     # для json
     id: int
+    longitude: str
+    latitude: str
     status: int
     date: field(default_factory=datetime.utcnow)
     number_confirmations: int

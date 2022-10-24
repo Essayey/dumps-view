@@ -5,7 +5,7 @@ from flask import jsonify, make_response, redirect, request, session
 from app import db
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, set_access_cookies,\
     set_refresh_cookies, get_jwt_identity
-
+from flask_cors import cross_origin
 
 class UserRegistrationResource(Resource):
     def __init__(self):
@@ -13,6 +13,7 @@ class UserRegistrationResource(Resource):
         self.parser.add_argument('username', type=str, required=True, location='args')
         self.parser.add_argument('password', type=str, required=True, location='args')
 
+    @cross_origin()
     def post(self):
         data = self.parser.parse_args()
 
@@ -25,8 +26,16 @@ class UserRegistrationResource(Resource):
             db.session.add(new_user)
             db.session.commit()
 
+            current_user = User.query.filter_by(username=data['username']).first()
+            session['role'] = 'User'
+            for role in current_user.roles:
+                session['role'] = role.name
+
             access_token = create_access_token(identity=data['username'])
             refresh_token = create_refresh_token(identity=data['username'])
+            resp = make_response(redirect(request.base_url, 302))
+            set_access_cookies(resp, access_token)
+            set_refresh_cookies(resp, refresh_token)
             return {
                 'message': f'User {data["username"]} was created',
                 'access_token': access_token,
@@ -42,6 +51,7 @@ class UserLoginResource(Resource):
         self.parser.add_argument('username', type=str, required=True, location='args')
         self.parser.add_argument('password', type=str, required=True, location='args')
 
+    @cross_origin()
     def post(self):
         data = self.parser.parse_args()
         current_user = User.query.filter_by(username=data['username']).first()
@@ -68,6 +78,7 @@ class UserLoginResource(Resource):
         else:
             return {'message': 'Wrong credentials'}
 
+    @cross_origin()
     @jwt_required(refresh=True)
     def put(self):
         current_user = get_jwt_identity()
