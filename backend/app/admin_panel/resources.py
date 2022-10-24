@@ -8,7 +8,7 @@ from flask_cors import  cross_origin
 class ChangeDumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument("status", type=int)
+        self.parser.add_argument("status", type=int, location='args')
 
     @cross_origin()
     @jwt_required()
