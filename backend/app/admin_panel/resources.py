@@ -8,11 +8,14 @@ from flask_cors import  cross_origin
 class ChangeDumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
+        self.parser.add_argument("status", type=int)
 
     @cross_origin()
     @jwt_required()
     @access_required(role="Admin")
     def put(self, dump_id):
-        # код
-        # print(123)
-        return jsonify({'res': True})
+        data = self.parser.parse_args()
+        dump = Dump.query.filter_by(id=dump_id).first()
+        dump.status = data["status"]
+        db.session.commit()
+        return make_response(jsonify({'result': True}), 201)
