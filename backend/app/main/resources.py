@@ -21,7 +21,7 @@ class DumpResource(Resource):
         args = self.parser.parse_args()
 
         if file := args['photo']:
-            file.save(f'app/static/{dump_id}.jpg')
+            file.save(f'app/static/dumps/{dump_id}.jpg')
 
         return make_response(jsonify({'res': True}), 201)
 
