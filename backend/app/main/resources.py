@@ -39,8 +39,6 @@ class DumpListResource(Resource):
         self.parser.add_argument('order_by_date', type=bool, location='args')
         args = self.parser.parse_args()
 
-        print(args['order_by_status'])
-
         dumps = Dump.query
 
         if args['order_by_status'] is not None:

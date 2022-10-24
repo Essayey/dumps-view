@@ -15,17 +15,21 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
-    rating = db.Column(db.Integer, default=0)
     number_confirmed_dumps = db.Column(db.Integer, default=0)
     number_false_dumps = db.Column(db.Integer, default=0)
 
     dumps = db.relationship("Dump", secondary=user_dump, back_populates="users")
 
     # что в json
-    id:       int
+    id: int
     username: str
-    rating:   int
+    rating: int
     number_confirmed_dumps: int
+
+    @property
+    def rating(self):
+        return self.number_confirmed_dumps - self.number_false_dumps
+
     @staticmethod
     def generate_hash(password):
         return sha256.hash(password)
@@ -51,7 +55,16 @@ class Dump(db.Model):
     id: int
     status: int
     date: field(default_factory=datetime.utcnow)
+    number_confirmations: int
+    user_rating: int
 
+    @property
+    def number_confirmations(self):
+        return len(self.users)
+
+    @property
+    def user_rating(self):
+        return self.users[0].rating
 
 # class RevokedTokenModel(db.Model):
 #     __tablename__ = 'revoked_tokens'
