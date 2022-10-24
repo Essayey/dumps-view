@@ -1,7 +1,7 @@
 from werkzeug.datastructures import FileStorage
 from flask_restful import Resource, reqparse
-from app.models import User, Dump
-from flask import jsonify, make_response, redirect, request
+from app.models import User, Dump, Role
+from flask import jsonify, make_response, redirect, request, session
 from app import db
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, set_access_cookies,\
     set_refresh_cookies, get_jwt_identity
@@ -55,6 +55,11 @@ class UserLoginResource(Resource):
             resp = make_response(redirect(request.base_url, 302))
             set_access_cookies(resp, access_token)
             set_refresh_cookies(resp, refresh_token)
+
+            session['role'] = 'User'
+            for role in current_user.roles:
+                session['role'] = role.name
+
             return {
                 'message': f'Logged in as {current_user.username}',
                 'access_token': access_token,

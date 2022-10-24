@@ -30,8 +30,10 @@ class DumpResource(Resource):
         try:
             db.session.add(new_dump)
             db.session.commit()
-            user = User.query.filter_by(id=args['user_id']).first()
-            user.dumps.append(new_dump)
+
+            if user := User.query.filter_by(id=args['user_id']).first():
+                new_dump.users.append(user)
+
             db.session.commit()
             return make_response(jsonify({'res': True}), 201)
 

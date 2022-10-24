@@ -8,6 +8,11 @@ user_dump = db.Table('user_dump',
                      db.Column('dump_id', db.ForeignKey("dumps.id"))
                      )
 
+user_role = db.Table('user_role',
+                     db.Column('user_id', db.ForeignKey("users.id")),
+                     db.Column('role_id', db.ForeignKey("roles.id"))
+                     )
+
 
 @dataclass
 class User(db.Model):
@@ -19,6 +24,7 @@ class User(db.Model):
     number_false_dumps = db.Column(db.Integer, default=0)
 
     dumps = db.relationship("Dump", secondary=user_dump, back_populates="users")
+    roles = db.relationship("Role", secondary=user_role, back_populates="users")
 
     # что в json
     id: int
@@ -37,6 +43,13 @@ class User(db.Model):
     @staticmethod
     def verify_hash(password, hash):
         return sha256.verify(password, hash)
+
+
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    users = db.relationship("User", secondary=user_role, back_populates="roles")
 
 
 @dataclass
@@ -64,7 +77,8 @@ class Dump(db.Model):
 
     @property
     def user_rating(self):
-        return self.users[0].rating
+        if users := self.users:
+            return users[0].rating
 
 # class RevokedTokenModel(db.Model):
 #     __tablename__ = 'revoked_tokens'
