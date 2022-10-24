@@ -9,7 +9,7 @@ const logo = require('../static/img/logo.png')
 const NavBar = observer(() => {
     const { user } = useContext(Context);
     return (
-        <Navbar bg="success" variant="light">
+        <Navbar bg="light" variant="light">
             <Container>
                 <Navbar.Brand>
                     <Link to={MAIN_ROUTE} className="normalize__link">
