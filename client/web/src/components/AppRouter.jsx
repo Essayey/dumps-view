@@ -1,10 +1,12 @@
-import React from 'react'
+import { observer } from 'mobx-react-lite';
+import React, { Fragment, useContext } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { Context } from '..';
 import { publicRoutes, authRoutes, guestRoutes, adminRoutes } from '../routes';
 
-const AppRouter = () => {
+const AppRouter = observer(() => {
     // MOCK
-    const user = { isAuth: true, role: 'ADMIN' };
+    const { user } = useContext(Context);
 
 
     return (
@@ -13,24 +15,27 @@ const AppRouter = () => {
                 <Route path={route.path} key={route.path} element={<route.component />} />
             )}
             {user.isAuth ?
-                authRoutes.map(route =>
-                    <Route path={route.path} key={route.path} element={<route.component />} />
-                )
+                <Fragment>
+                    {authRoutes.map(route =>
+                        <Route path={route.path} key={route.path} element={<route.component />} />
+                    )
+                    }
+                    {user.user.role === 'ADMIN' &&
+                        adminRoutes.map(route =>
+                            <Route path={route.path} key={route.path} element={<route.component />} />
+                        )
+                    }
+                </Fragment>
                 :
                 guestRoutes.map(route =>
                     <Route path={route.path} key={route.path} element={<route.component />} />
                 )
             }
-            {user.role === 'ADMIN' &&
-                adminRoutes.map(route =>
-                    <Route path={route.path} key={route.path} element={<route.component />} />
-                )
-            }
+
 
             <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
     )
-
-}
+})
 
 export default AppRouter
