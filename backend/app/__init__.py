@@ -57,3 +57,7 @@ def create_app(config_class=Config):
 
 
 from app import models
+# @jwt.token_in_blocklist_loader()
+# def check_if_token_in_blacklist(decrypted_token):
+#     jti = decrypted_token['jti']
+#     return models.RevokedTokenModel.is_jti_blacklisted(jti)
