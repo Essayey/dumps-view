@@ -53,7 +53,8 @@ class UserLoginResource(Resource):
         self.parser.add_argument('password', type=str, required=True)
 
     def post(self):
-        data = self.parser.parse_args()
+        # data = self.parser.parse_args()
+        data = {'username': 'xxx', 'password': '123'}
         current_user = User.query.filter_by(username=data['username']).first()
 
         if not current_user:
@@ -83,12 +84,13 @@ class UserLoginResource(Resource):
     def put(self):
         current_user = get_jwt_identity()
 
-        session['role'] = 'User'
-        for role in current_user.roles:
-            session['role'] = role.name
-        jwt_data = {'id': current_user.id, 'username': current_user.username, 'role': session['role']}
+        session['role'] = current_user['role']
+        jwt_data = {'id': current_user['id'], 'username': current_user['username'], 'role': current_user['role']}
 
         access_token = create_access_token(identity=jwt_data)
+        resp = make_response(redirect(request.base_url, 302))
+        set_access_cookies(resp, access_token)
+
         return jsonify({'access_token': access_token})
 
 
