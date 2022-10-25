@@ -53,8 +53,7 @@ class UserLoginResource(Resource):
         self.parser.add_argument('password', type=str, required=True)
 
     def post(self):
-        # data = self.parser.parse_args()
-        data = {'username': 'xxx', 'password': '123'}
+        data = self.parser.parse_args()
         current_user = User.query.filter_by(username=data['username']).first()
 
         if not current_user:
