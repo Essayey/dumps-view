@@ -10,7 +10,6 @@ class DumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
 
-    @cross_origin()
     def get(self):
         self.parser.add_argument('id', type=int, required=True, location='args')
         args = self.parser.parse_args()
@@ -20,7 +19,6 @@ class DumpResource(Resource):
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
-    @cross_origin()
     def post(self):
         """Создаёт свалку"""
         self.parser.add_argument('lng', type=str, required=True, location='args')
@@ -61,8 +59,8 @@ class DumpListResource(Resource):
 
     @cross_origin()
     def post(self):
-        self.parser.add_argument('order_by_status', type=bool, location='args')
-        self.parser.add_argument('order_by_date', type=bool, location='args')
+        self.parser.add_argument('order_by_status', type=bool)
+        self.parser.add_argument('order_by_date', type=bool)
         args = self.parser.parse_args()
 
         dumps = Dump.query
