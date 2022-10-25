@@ -8,7 +8,8 @@ from app import db, access_required
 class ChangeDumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument("status", type=int, location='args')
+        self.parser.add_argument("id", type=int)
+        self.parser.add_argument("status", type=int)
 
     @jwt_required()
     @access_required(role="Admin")
