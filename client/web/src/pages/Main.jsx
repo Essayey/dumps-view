@@ -44,7 +44,7 @@ const Main = () => {
                         >
                             <Popup >
                                 <div style={{ maxWidth: 200 }}>
-                                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Id architecto nobis veritatis fuga repellat nulla expedita adipisci quo vero totam.
+                                    Отмечая незаконные свалки, вы вносите большой вклад в благоустройство Калужской области!
                                     <br />
                                     <img src="https://picsum.photos/200" />
                                 </div>
