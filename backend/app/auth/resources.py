@@ -92,7 +92,3 @@ class UserLoginResource(Resource):
         set_access_cookies(resp, access_token)
 
         return jsonify({'access_token': access_token})
-
-
-# class UserLogoutResource(Resource):
-#     pass

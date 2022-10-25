@@ -39,7 +39,7 @@ class DumpResource(Resource):
             if file := args['photo']:
                 file.save(f'app/static/dumps/{dump.id}.jpg')
 
-            if user := User.query.filter_by(id=args['user_id']).first():
+            if user := User.query.filter_by(id=args['user_id']).first() and jwt_required():
                 new_dump.users.append(user)
 
             db.session.commit()
