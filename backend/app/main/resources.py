@@ -50,7 +50,6 @@ class DumpResource(Resource):
         except:
             return {'message': 'Something went wrong'}, 500
 
-    @jwt_required()
     @access_required(role="Admin")
     def delete(self):
         try:
