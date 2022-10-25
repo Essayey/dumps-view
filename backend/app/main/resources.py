@@ -21,14 +21,12 @@ class DumpResource(Resource):
         return jsonify({'message': 'User not found'})
 
 
-    @jwt_required()
-    @access_required(role="Admin")
     def post(self):
         """Создаёт свалку"""
         self.parser.add_argument('lng', type=str, required=True)
         self.parser.add_argument('lat', type=str, required=True)
-        self.parser.add_argument('description', type=str, required=True)
-        self.parser.add_argument('user_id', type=int, required=True)
+        self.parser.add_argument('description', type=str)
+        self.parser.add_argument('user_id', type=int)
         self.parser.add_argument('photo', type=FileStorage, location='files')
         args = self.parser.parse_args()
 
@@ -59,6 +57,9 @@ class DumpResource(Resource):
             dump = Dump.query.filter_by(id=args['id']).first()
 
             if dump:
+                if dump.users[0]:
+                    dump.users[0].number_false_dumps += 1
+                    db.session.commit()
                 db.session.delete(dump)
                 db.session.commit()
                 return make_response(jsonify({'result': 'delete'}), 202)
