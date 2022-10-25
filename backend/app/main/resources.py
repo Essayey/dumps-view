@@ -38,8 +38,8 @@ class DumpResource(Resource):
 
             dump = Dump.query.all()[-1]
             if file := args['photo']:
-                # file.save(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg')
-                file.save(getcwd() + f'/dump-view/app/static/dumps/{dump.id}.jpg')
+                file.save(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg')
+                # file.save(getcwd() + f'/dump-view/app/static/dumps/{dump.id}.jpg')
 
             if user := get_jwt_identity():
                 user = User.query.filter_by(id=user['id']).first()
