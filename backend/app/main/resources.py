@@ -5,8 +5,9 @@ from flask import jsonify, make_response
 from app import db, access_required
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
-# from flask import current_user
 from os import getcwd
+from flask import current_app
+
 
 class DumpResource(Resource):
     def __init__(self):
@@ -37,6 +38,7 @@ class DumpResource(Resource):
 
             dump = Dump.query.all()[-1]
             if file := args['photo']:
+                current_app.logger.info(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg', file)
                 file.save(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg')
 
             # if user := User.query.filter_by(id=args['user_id']).first() and jwt_required():
@@ -44,7 +46,6 @@ class DumpResource(Resource):
 
             db.session.commit()
             return make_response(jsonify({'result': True}), 201)
-
         except:
             return {'message': 'Something went wrong'}, 500
 
