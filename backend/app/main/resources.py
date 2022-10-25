@@ -2,8 +2,9 @@ from werkzeug.datastructures import FileStorage
 from flask_restful import Resource, reqparse
 from app.models import Dump, User
 from flask import jsonify, make_response
-from app import db
+from app import db, access_required
 from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
 
 
 class DumpResource(Resource):
@@ -50,6 +51,8 @@ class DumpResource(Resource):
             return {'message': 'Something went wrong'}, 500
 
     @cross_origin()
+    @jwt_required()
+    @access_required(role="Admin")
     def delete(self):
         try:
             args = self.parser.parse_args()
