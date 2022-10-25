@@ -82,7 +82,13 @@ class UserLoginResource(Resource):
     @jwt_required(refresh=True)
     def put(self):
         current_user = get_jwt_identity()
-        access_token = create_access_token(identity=current_user)
+
+        session['role'] = 'User'
+        for role in current_user.roles:
+            session['role'] = role.name
+        jwt_data = {'id': current_user.id, 'username': current_user.username, 'role': session['role']}
+
+        access_token = create_access_token(identity=jwt_data)
         return jsonify({'access_token': access_token})
 
 
