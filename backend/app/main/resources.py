@@ -12,7 +12,6 @@ class DumpResource(Resource):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('id', type=int, required=True)
 
-    @cross_origin()
     def get(self):
         args = self.parser.parse_args()
 
@@ -21,9 +20,9 @@ class DumpResource(Resource):
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
+
     @jwt_required()
     @access_required(role="Admin")
-    @cross_origin()
     def post(self):
         """Создаёт свалку"""
         self.parser.add_argument('lng', type=str, required=True)
@@ -52,7 +51,6 @@ class DumpResource(Resource):
         except:
             return {'message': 'Something went wrong'}, 500
 
-    @cross_origin()
     @jwt_required()
     @access_required(role="Admin")
     def delete(self):
@@ -70,12 +68,10 @@ class DumpListResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
 
-    @cross_origin()
     def get(self):
         dumps = Dump.query.all()
         return jsonify(dumps)
 
-    @cross_origin()
     def post(self):
         self.parser.add_argument('order_by_status', type=bool)
         self.parser.add_argument('order_by_date', type=bool)

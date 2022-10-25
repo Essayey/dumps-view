@@ -5,15 +5,14 @@ from flask import jsonify, make_response, redirect, request, session
 from app import db
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, set_access_cookies,\
     set_refresh_cookies, get_jwt_identity
-from flask_cors import cross_origin
+
 
 class UserRegistrationResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument('username', type=str, required=True, location='args')
-        self.parser.add_argument('password', type=str, required=True, location='args')
+        self.parser.add_argument('username', type=str, required=True)
+        self.parser.add_argument('password', type=str, required=True)
 
-    @cross_origin()
     def post(self):
         data = self.parser.parse_args()
 
@@ -31,8 +30,10 @@ class UserRegistrationResource(Resource):
             for role in current_user.roles:
                 session['role'] = role.name
 
-            access_token = create_access_token(identity=data['username'])
-            refresh_token = create_refresh_token(identity=data['username'])
+            jwt_data = {'id': current_user.id, 'username': current_user.username, 'role': session['role']}
+
+            access_token = create_access_token(identity=jwt_data)
+            refresh_token = create_refresh_token(identity=jwt_data)
             resp = make_response(redirect(request.base_url, 302))
             set_access_cookies(resp, access_token)
             set_refresh_cookies(resp, refresh_token)
@@ -48,10 +49,9 @@ class UserRegistrationResource(Resource):
 class UserLoginResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument('username', type=str, required=True, location='args')
-        self.parser.add_argument('password', type=str, required=True, location='args')
+        self.parser.add_argument('username', type=str, required=True)
+        self.parser.add_argument('password', type=str, required=True)
 
-    @cross_origin()
     def post(self):
         data = self.parser.parse_args()
         current_user = User.query.filter_by(username=data['username']).first()
@@ -60,15 +60,16 @@ class UserLoginResource(Resource):
             return {'message': f'User {data["username"]} doesn\'t exist'}
 
         if User.verify_hash(data['password'], current_user.password_hash):
-            access_token = create_access_token(identity=data['username'])
-            refresh_token = create_refresh_token(identity=data['username'])
-            resp = make_response(redirect(request.base_url, 302))
-            set_access_cookies(resp, access_token)
-            set_refresh_cookies(resp, refresh_token)
-
             session['role'] = 'User'
             for role in current_user.roles:
                 session['role'] = role.name
+
+            jwt_data = {'id': current_user.id, 'username': current_user.username, 'role': session['role']}
+            access_token = create_access_token(identity=jwt_data)
+            refresh_token = create_refresh_token(identity=jwt_data)
+            resp = make_response(redirect(request.base_url, 302))
+            set_access_cookies(resp, access_token)
+            set_refresh_cookies(resp, refresh_token)
 
             return {
                 'message': f'Logged in as {current_user.username}',
@@ -78,7 +79,6 @@ class UserLoginResource(Resource):
         else:
             return {'message': 'Wrong credentials'}
 
-    @cross_origin()
     @jwt_required(refresh=True)
     def put(self):
         current_user = get_jwt_identity()
