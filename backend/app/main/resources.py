@@ -6,18 +6,16 @@ from app import db, access_required
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required, get_jwt_identity
 # from flask import current_user
-
+from os import getcwd
 
 class DumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
 
     def get(self):
+        self.parser.add_argument('id', type=int, required=True)
         args = self.parser.parse_args()
 
-        # print(current_user)
-
-        self.parser.add_argument('id', type=int)
         dump_id = args['id']
         if dump := Dump.query.filter_by(id=dump_id).first():
             return jsonify(dump)
@@ -32,7 +30,7 @@ class DumpResource(Resource):
         self.parser.add_argument('photo', type=FileStorage, location='files')
         args = self.parser.parse_args()
 
-        new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'])
+        new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'] if args['description'] else '')
 
         try:
             db.session.add(new_dump)
@@ -40,7 +38,7 @@ class DumpResource(Resource):
 
             dump = Dump.query.all()[-1]
             if file := args['photo']:
-                file.save(f'app/static/dumps/{dump.id}.jpg')
+                file.save(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg')
 
             if user := get_jwt_identity():
                 user = User.query.filter_by(id=user['id']).first()
@@ -56,7 +54,7 @@ class DumpResource(Resource):
     @access_required(role="Admin")
     def delete(self):
         try:
-            self.parser.add_argument('id', type=int)
+            self.parser.add_argument('id', type=int, required=True)
             args = self.parser.parse_args()
             dump = Dump.query.filter_by(id=args['id']).first()
 

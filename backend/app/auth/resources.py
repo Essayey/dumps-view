@@ -37,6 +37,9 @@ class UserRegistrationResource(Resource):
             resp = make_response(redirect(request.base_url, 302))
             set_access_cookies(resp, access_token)
             set_refresh_cookies(resp, refresh_token)
+
+            session['id'] = current_user.id
+
             return {
                 'message': f'User {data["username"]} was created',
                 'access_token': access_token,
@@ -71,6 +74,8 @@ class UserLoginResource(Resource):
             set_access_cookies(resp, access_token)
             set_refresh_cookies(resp, refresh_token)
 
+            session['id'] = current_user.id
+
             return {
                 'message': f'Logged in as {current_user.username}',
                 'access_token': access_token,
@@ -84,6 +89,7 @@ class UserLoginResource(Resource):
         current_user = get_jwt_identity()
 
         session['role'] = current_user['role']
+        session['id'] = current_user['id']
         jwt_data = {'id': current_user['id'], 'username': current_user['username'], 'role': current_user['role']}
 
         access_token = create_access_token(identity=jwt_data)
