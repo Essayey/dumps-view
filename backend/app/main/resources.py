@@ -21,13 +21,15 @@ class DumpResource(Resource):
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
+    @jwt_required()
+    @access_required(role="Admin")
     @cross_origin()
     def post(self):
         """Создаёт свалку"""
-        self.parser.add_argument('lng', type=str, required=True, location='args')
-        self.parser.add_argument('lat', type=str, required=True, location='args')
-        self.parser.add_argument('description', type=str, location='args')
-        self.parser.add_argument('user_id', type=int, location='args')
+        self.parser.add_argument('lng', type=str, required=True)
+        self.parser.add_argument('lat', type=str, required=True)
+        self.parser.add_argument('description', type=str, required=True)
+        self.parser.add_argument('user_id', type=int, required=True)
         self.parser.add_argument('photo', type=FileStorage, location='files')
         args = self.parser.parse_args()
 
@@ -75,8 +77,8 @@ class DumpListResource(Resource):
 
     @cross_origin()
     def post(self):
-        self.parser.add_argument('order_by_status', type=bool, location='args')
-        self.parser.add_argument('order_by_date', type=bool, location='args')
+        self.parser.add_argument('order_by_status', type=bool)
+        self.parser.add_argument('order_by_date', type=bool)
         args = self.parser.parse_args()
 
         dumps = Dump.query
