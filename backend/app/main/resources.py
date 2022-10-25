@@ -48,16 +48,18 @@ class DumpResource(Resource):
         except:
             return {'message': 'Something went wrong'}, 500
 
-    @cross_origin()
     @jwt_required()
     @access_required(role="Admin")
     def delete(self):
         try:
             args = self.parser.parse_args()
             dump = Dump.query.filter_by(id=args['id']).first()
-            db.session.delete(dump)
-            db.session.commit()
-            return make_response(jsonify({'result': True}), 201)
+
+            if dump:
+                db.session.delete(dump)
+                db.session.commit()
+                return make_response(jsonify({'result': 'delete'}), 202)
+            return make_response(jsonify({'delete': 'obj not found'}), 202)
         except:
             return {'message': 'Something went wrong'}, 500
 
