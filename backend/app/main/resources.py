@@ -4,33 +4,33 @@ from app.models import Dump, User
 from flask import jsonify, make_response
 from app import db, access_required
 from flask_cors import cross_origin
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 # from flask import current_user
 
 
 class DumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument('id', type=int, required=True)
 
     def get(self):
         args = self.parser.parse_args()
 
         # print(current_user)
 
+        self.parser.add_argument('id', type=int)
         dump_id = args['id']
         if dump := Dump.query.filter_by(id=dump_id).first():
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
+    @jwt_required(optional=True)
     def post(self):
         """Создаёт свалку"""
         self.parser.add_argument('lng', type=str, required=True, location="form")
         self.parser.add_argument('lat', type=str, required=True, location="form")
         self.parser.add_argument('description', type=str, location="form")
-        # self.parser.add_argument('photo', type=FileStorage, location='files')
+        self.parser.add_argument('photo', type=FileStorage, location='files')
         args = self.parser.parse_args()
-        print(args)
 
         new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'])
 
@@ -42,8 +42,9 @@ class DumpResource(Resource):
             if file := args['photo']:
                 file.save(f'app/static/dumps/{dump.id}.jpg')
 
-            # if user := User.query.filter_by(id=args['user_id']).first() and jwt_required():
-            #     new_dump.users.append(user)
+            if user := get_jwt_identity():
+                user = User.query.filter_by(id=user['id']).first()
+                new_dump.users.append(user)
 
             db.session.commit()
             return make_response(jsonify({'result': True}), 201)
@@ -55,6 +56,7 @@ class DumpResource(Resource):
     @access_required(role="Admin")
     def delete(self):
         try:
+            self.parser.add_argument('id', type=int)
             args = self.parser.parse_args()
             dump = Dump.query.filter_by(id=args['id']).first()
 
