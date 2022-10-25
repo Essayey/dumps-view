@@ -8,11 +8,12 @@ from app import db, access_required
 class ChangeDumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument("status", type=int, location='args')
+        self.parser.add_argument("id", type=int)
+        self.parser.add_argument("status", type=int)
 
-    def put(self, dump_id):
+    def put(self):
         data = self.parser.parse_args()
-        dump = Dump.query.filter_by(id=dump_id).first()
+        dump = Dump.query.filter_by(id=data["id"]).first()
         dump.status = data["status"]
         db.session.commit()
         if dump.users[0]:

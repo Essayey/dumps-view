@@ -17,7 +17,7 @@ class UserRegistrationResource(Resource):
         data = self.parser.parse_args()
 
         if User.query.filter_by(username=data['username']).first():
-            return jsonify({'message': f"User {data['username']} already exists"})
+            return make_response(jsonify({'message': f"User {data['username']} already exists"}), 403)
 
         new_user = User(username=data['username'], password_hash=User.generate_hash(data['password']))
 
@@ -57,7 +57,7 @@ class UserLoginResource(Resource):
         current_user = User.query.filter_by(username=data['username']).first()
 
         if not current_user:
-            return {'message': f'User {data["username"]} doesn\'t exist'}
+            return make_response(jsonify({'message': f'User {data["username"]} doesn\'t exist'}), 403)
 
         if User.verify_hash(data['password'], current_user.password_hash):
             session['role'] = 'User'
@@ -77,12 +77,18 @@ class UserLoginResource(Resource):
                 'refresh_token': refresh_token
             }
         else:
-            return {'message': 'Wrong credentials'}
+            return make_response(jsonify({'message': 'Wrong credentials'}, 403))
 
     @jwt_required(refresh=True)
     def put(self):
         current_user = get_jwt_identity()
-        access_token = create_access_token(identity=current_user)
+
+        session['role'] = 'User'
+        for role in current_user.roles:
+            session['role'] = role.name
+        jwt_data = {'id': current_user.id, 'username': current_user.username, 'role': session['role']}
+
+        access_token = create_access_token(identity=jwt_data)
         return jsonify({'access_token': access_token})
 
 
