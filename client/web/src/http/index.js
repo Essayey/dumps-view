@@ -1,15 +1,15 @@
 import axios from 'axios'
 
 const $host = axios.create({
-    baseURL: 'https://losharik27.pythonanywhere.com/'
+    baseURL: 'https://losharik1713.pythonanywhere.com/'
 })
 
 const $authHost = axios.create({
-    baseURL: 'https://losharik27.pythonanywhere.com/'
+    baseURL: 'https://losharik1713.pythonanywhere.com/'
 })
 
 const $refreshHost = axios.create({
-    baseURL: 'https://losharik27.pythonanywhere.com/'
+    baseURL: 'https://losharik1713.pythonanywhere.com/'
 })
 
 const authInterceptor = config => {
