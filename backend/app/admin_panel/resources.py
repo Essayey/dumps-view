@@ -11,6 +11,8 @@ class ChangeDumpResource(Resource):
         self.parser.add_argument("id", type=int)
         self.parser.add_argument("status", type=int)
 
+    @jwt_required()
+    @access_required(role="Admin")
     def put(self):
         data = self.parser.parse_args()
         dump = Dump.query.filter_by(id=data["id"]).first()
