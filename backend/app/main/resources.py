@@ -20,6 +20,7 @@ class DumpResource(Resource):
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
+
     def post(self):
         """Создаёт свалку"""
         self.parser.add_argument('lng', type=str, required=True)
@@ -56,6 +57,9 @@ class DumpResource(Resource):
             dump = Dump.query.filter_by(id=args['id']).first()
 
             if dump:
+                if dump.users[0]:
+                    dump.users[0].number_false_dumps += 1
+                    db.session.commit()
                 db.session.delete(dump)
                 db.session.commit()
                 return make_response(jsonify({'result': 'delete'}), 202)

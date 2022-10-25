@@ -11,11 +11,12 @@ class ChangeDumpResource(Resource):
         self.parser.add_argument("id", type=int)
         self.parser.add_argument("status", type=int)
 
-    @jwt_required()
-    @access_required(role="Admin")
-    def put(self, dump_id):
+    def put(self):
         data = self.parser.parse_args()
-        dump = Dump.query.filter_by(id=dump_id).first()
+        dump = Dump.query.filter_by(id=data["id"]).first()
         dump.status = data["status"]
         db.session.commit()
+        if dump.users[0]:
+            dump.users[0].number_confirmed_dumps += 1
+            db.session.commit()
         return make_response(jsonify({'result': True}), 201)
