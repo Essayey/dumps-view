@@ -69,6 +69,7 @@ class Dump(db.Model):
     id: int
     longitude: str
     latitude: str
+    description: str
     status: int
     date: field(default_factory=datetime.utcnow)
     number_confirmations: int
