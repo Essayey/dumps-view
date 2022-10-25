@@ -9,10 +9,10 @@ from flask_cors import cross_origin
 class DumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
+        self.parser.add_argument('id', type=int, required=True)
 
     @cross_origin()
     def get(self):
-        self.parser.add_argument('id', type=int, required=True, location='args')
         args = self.parser.parse_args()
 
         dump_id = args['id']
@@ -46,6 +46,17 @@ class DumpResource(Resource):
             db.session.commit()
             return make_response(jsonify({'result': True}), 201)
 
+        except:
+            return {'message': 'Something went wrong'}, 500
+
+    @cross_origin()
+    def delete(self):
+        try:
+            args = self.parser.parse_args()
+            dump = Dump.query.filter_by(id=args['id']).first()
+            db.session.delete(dump)
+            db.session.commit()
+            return make_response(jsonify({'result': True}), 201)
         except:
             return {'message': 'Something went wrong'}, 500
 
