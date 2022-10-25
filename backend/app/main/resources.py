@@ -2,17 +2,18 @@ from werkzeug.datastructures import FileStorage
 from flask_restful import Resource, reqparse
 from app.models import Dump, User
 from flask import jsonify, make_response
-from app import db
-from flask_cors import cross_origin
+from app import db, access_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from os import getcwd
+from flask import current_app
 
 
 class DumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
 
-    @cross_origin()
     def get(self):
-        self.parser.add_argument('id', type=int, required=True, location='args')
+        self.parser.add_argument('id', type=int, required=True)
         args = self.parser.parse_args()
 
         dump_id = args['id']
@@ -20,17 +21,16 @@ class DumpResource(Resource):
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
-    @cross_origin()
+    # @jwt_required(optional=True)
     def post(self):
         """Создаёт свалку"""
-        self.parser.add_argument('lng', type=str, required=True, location='args')
-        self.parser.add_argument('lat', type=str, required=True, location='args')
-        self.parser.add_argument('description', type=str, location='args')
-        self.parser.add_argument('user_id', type=int, location='args')
+        self.parser.add_argument('lng', type=str, required=True, location="form")
+        self.parser.add_argument('lat', type=str, required=True, location="form")
+        self.parser.add_argument('description', type=str, location="form")
         self.parser.add_argument('photo', type=FileStorage, location='files')
         args = self.parser.parse_args()
 
-        new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'])
+        new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'] if args['description'] else '')
 
         try:
             db.session.add(new_dump)
@@ -38,14 +38,33 @@ class DumpResource(Resource):
 
             dump = Dump.query.all()[-1]
             if file := args['photo']:
-                file.save(f'app/static/dumps/{dump.id}.jpg')
+                file.save(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg')
+                # file.save(getcwd() + f'/dump-view/app/static/dumps/{dump.id}.jpg')
 
-            if user := User.query.filter_by(id=args['user_id']).first():
+            if user := get_jwt_identity():
+                user = User.query.filter_by(id=user['id']).first()
                 new_dump.users.append(user)
 
             db.session.commit()
             return make_response(jsonify({'result': True}), 201)
+        except:
+            return {'message': 'Something went wrong'}, 500
 
+    # @access_required(role="Admin")
+    def delete(self):
+        try:
+            self.parser.add_argument('id', type=int, required=True)
+            args = self.parser.parse_args()
+            dump = Dump.query.filter_by(id=args['id']).first()
+
+            if dump:
+                if dump.users[0]:
+                    dump.users[0].number_false_dumps += 1
+                    db.session.commit()
+                db.session.delete(dump)
+                db.session.commit()
+                return make_response(jsonify({'result': 'delete'}), 202)
+            return make_response(jsonify({'delete': 'obj not found'}), 202)
         except:
             return {'message': 'Something went wrong'}, 500
 
@@ -54,15 +73,13 @@ class DumpListResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
 
-    @cross_origin()
     def get(self):
         dumps = Dump.query.all()
         return jsonify(dumps)
 
-    @cross_origin()
     def post(self):
-        self.parser.add_argument('order_by_status', type=bool, location='args')
-        self.parser.add_argument('order_by_date', type=bool, location='args')
+        self.parser.add_argument('order_by_status', type=bool)
+        self.parser.add_argument('order_by_date', type=bool)
         args = self.parser.parse_args()
 
         dumps = Dump.query

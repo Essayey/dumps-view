@@ -2,6 +2,7 @@ from datetime import datetime
 from app import db
 from passlib.hash import pbkdf2_sha256 as sha256
 from dataclasses import dataclass, field
+from os import path, getcwd
 
 user_dump = db.Table('user_dump',
                      db.Column('user_id', db.ForeignKey("users.id")),
@@ -68,10 +69,12 @@ class Dump(db.Model):
     id: int
     longitude: str
     latitude: str
+    description: str
     status: int
     date: field(default_factory=datetime.utcnow)
     number_confirmations: int
     user_rating: int
+    img_url: str
 
     @property
     def number_confirmations(self):
@@ -81,6 +84,14 @@ class Dump(db.Model):
     def user_rating(self):
         if users := self.users:
             return users[0].rating
+
+    @property
+    def img_url(self):
+        if path.exists(getcwd() + f'/app/static/dumps/{self.id}.jpg'):
+            return f'/static/dumps/{self.id}.jpg'
+        # if path.exists(getcwd() + f'/dump-view/app/static/dumps/{self.id}.jpg'):
+        #     return f'/static/dumps/{self.id}.jpg'
+        return ''
 
 # class RevokedTokenModel(db.Model):
 #     __tablename__ = 'revoked_tokens'

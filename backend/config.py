@@ -19,3 +19,4 @@ class Config(object):
 
 '''1m|MWoY?@S$kiEfO'''
 '''https://losharik27.pythonanywhere.com'''
+'''платформа обратной связи api'''
