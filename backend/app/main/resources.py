@@ -11,12 +11,10 @@ from flask_jwt_extended import jwt_required
 class DumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument('id', type=int, required=True)
 
     def get(self):
+        self.parser.add_argument('id', type=int, required=True)
         args = self.parser.parse_args()
-
-        # print(current_user)
 
         dump_id = args['id']
         if dump := Dump.query.filter_by(id=dump_id).first():
@@ -28,9 +26,8 @@ class DumpResource(Resource):
         self.parser.add_argument('lng', type=str, required=True, location="form")
         self.parser.add_argument('lat', type=str, required=True, location="form")
         self.parser.add_argument('description', type=str, location="form")
-        # self.parser.add_argument('photo', type=FileStorage, location='files')
+        self.parser.add_argument('photo', type=FileStorage, location='files')
         args = self.parser.parse_args()
-        print(args)
 
         new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'])
 
@@ -55,6 +52,7 @@ class DumpResource(Resource):
     @access_required(role="Admin")
     def delete(self):
         try:
+            self.parser.add_argument('id', type=int, required=True)
             args = self.parser.parse_args()
             dump = Dump.query.filter_by(id=args['id']).first()
 
