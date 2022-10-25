@@ -89,6 +89,8 @@ class Dump(db.Model):
     def img_url(self):
         if path.exists(getcwd() + f'/app/static/dumps/{self.id}.jpg'):
             return f'/static/dumps/{self.id}.jpg'
+        # if path.exists(getcwd() + f'/dump-view/app/static/dumps/{self.id}.jpg'):
+        #     return f'/static/dumps/{self.id}.jpg'
         return ''
 
 # class RevokedTokenModel(db.Model):
