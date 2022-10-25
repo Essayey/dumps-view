@@ -21,7 +21,7 @@ class DumpResource(Resource):
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
-    @jwt_required(optional=True)
+    # @jwt_required(optional=True)
     def post(self):
         """Создаёт свалку"""
         self.parser.add_argument('lng', type=str, required=True, location="form")
@@ -50,7 +50,7 @@ class DumpResource(Resource):
         except:
             return {'message': 'Something went wrong'}, 500
 
-    @access_required(role="Admin")
+    # @access_required(role="Admin")
     def delete(self):
         try:
             self.parser.add_argument('id', type=int, required=True)

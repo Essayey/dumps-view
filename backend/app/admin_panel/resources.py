@@ -11,7 +11,7 @@ class ChangeDumpResource(Resource):
         self.parser.add_argument("id", type=int)
         self.parser.add_argument("status", type=int)
 
-    @access_required(role="Admin")
+    # @access_required(role="Admin")
     def put(self):
         data = self.parser.parse_args()
         dump = Dump.query.filter_by(id=data["id"]).first()

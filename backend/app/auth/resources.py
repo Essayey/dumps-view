@@ -84,7 +84,7 @@ class UserLoginResource(Resource):
         else:
             return make_response(jsonify({'message': 'Wrong credentials'}, 403))
 
-    @jwt_required(refresh=True)
+    # @jwt_required(refresh=True)
     def put(self):
         current_user = get_jwt_identity()
 
