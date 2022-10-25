@@ -2,16 +2,17 @@ from werkzeug.datastructures import FileStorage
 from flask_restful import Resource, reqparse
 from app.models import Dump, User
 from flask import jsonify, make_response
-from app import db
+from app import db, access_required
 from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
 
 
 class DumpResource(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
+        self.parser.add_argument('id', type=int, required=True)
 
     def get(self):
-        self.parser.add_argument('id', type=int, required=True, location='args')
         args = self.parser.parse_args()
 
         dump_id = args['id']
@@ -44,6 +45,19 @@ class DumpResource(Resource):
             db.session.commit()
             return make_response(jsonify({'result': True}), 201)
 
+        except:
+            return {'message': 'Something went wrong'}, 500
+
+    @cross_origin()
+    @jwt_required()
+    @access_required(role="Admin")
+    def delete(self):
+        try:
+            args = self.parser.parse_args()
+            dump = Dump.query.filter_by(id=args['id']).first()
+            db.session.delete(dump)
+            db.session.commit()
+            return make_response(jsonify({'result': True}), 201)
         except:
             return {'message': 'Something went wrong'}, 500
 
