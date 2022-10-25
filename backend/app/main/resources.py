@@ -3,8 +3,7 @@ from flask_restful import Resource, reqparse
 from app.models import Dump, User
 from flask import jsonify, make_response
 from app import db, access_required
-from flask_cors import cross_origin
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from os import getcwd
 from flask import current_app
 
@@ -22,6 +21,7 @@ class DumpResource(Resource):
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
+    @jwt_required(optional=True)
     def post(self):
         """Создаёт свалку"""
         self.parser.add_argument('lng', type=str, required=True, location="form")
@@ -41,8 +41,9 @@ class DumpResource(Resource):
                 current_app.logger.info(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg', file)
                 file.save(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg')
 
-            # if user := User.query.filter_by(id=args['user_id']).first() and jwt_required():
-            #     new_dump.users.append(user)
+            if user := get_jwt_identity():
+                user = User.query.filter_by(id=user['id']).first()
+                new_dump.users.append(user)
 
             db.session.commit()
             return make_response(jsonify({'result': True}), 201)
