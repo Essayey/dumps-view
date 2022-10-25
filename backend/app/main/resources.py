@@ -6,7 +6,7 @@ from app import db, access_required
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
 # from flask import current_user
-
+from os import getcwd
 
 class DumpResource(Resource):
     def __init__(self):
@@ -29,7 +29,7 @@ class DumpResource(Resource):
         self.parser.add_argument('photo', type=FileStorage, location='files')
         args = self.parser.parse_args()
 
-        new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'])
+        new_dump = Dump(longitude=args['lng'], latitude=args['lat'], description=args['description'] if args['description'] else '')
 
         try:
             db.session.add(new_dump)
@@ -37,7 +37,7 @@ class DumpResource(Resource):
 
             dump = Dump.query.all()[-1]
             if file := args['photo']:
-                file.save(f'app/static/dumps/{dump.id}.jpg')
+                file.save(getcwd() + f'\\app\\static\\dumps\\{dump.id}.jpg')
 
             # if user := User.query.filter_by(id=args['user_id']).first() and jwt_required():
             #     new_dump.users.append(user)
