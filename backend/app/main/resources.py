@@ -20,9 +20,6 @@ class DumpResource(Resource):
             return jsonify(dump)
         return jsonify({'message': 'User not found'})
 
-
-    @jwt_required()
-    @access_required(role="Admin")
     def post(self):
         """Создаёт свалку"""
         self.parser.add_argument('lng', type=str, required=True)
