@@ -74,8 +74,14 @@ class DumpListResource(Resource):
         self.parser = reqparse.RequestParser()
 
     def get(self):
-        dumps = Dump.query.all()
-        return jsonify(dumps)
+        self.parser.add_argument('status', type=int, location='args')
+        args = self.parser.parse_args()
+
+        dumps = Dump.query
+        if args['status']:
+            dumps = dumps.filter_by(status=args['status'])
+
+        return jsonify(dumps.all())
 
     def post(self):
         self.parser.add_argument('order_by_status', type=bool)
