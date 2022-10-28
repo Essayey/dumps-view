@@ -1,6 +1,9 @@
+import { Handler } from 'leaflet';
 import React, { useState } from 'react'
+import { useEffect } from 'react';
 import { Button, Form } from 'react-bootstrap'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
+import { dumpApi } from '../http/dumpApi';
 
 const Admin = () => {
     const [selected, setSelected] = useState(null);
@@ -8,26 +11,51 @@ const Admin = () => {
     const [isNewShow, setIsNewShow] = useState(true);
     const [isDoneShow, setIsDoneShow] = useState(false);
 
-    const [dumpsCurrent, setDumpsCurrent] = useState([
-        { id: 0, lat: 54.515427399355154, lng: 36.24768254508607, description: '', img: '', verificationAmount: 1 },
-        { id: 1, lat: 54.51507844132908, lng: 36.25071749461759, description: '', img: '', verificationAmount: 1 },
-        { id: 2, lat: 54.5137573589381, lng: 36.24701764448197, description: '', img: '', verificationAmount: 1 },
-    ])
-    const [dumpsNew, setDumpsNew] = useState([
-        { id: 3, lat: 54.51338345993791, lng: 36.24993462777728, description: '', img: '', verificationAmount: 1 },
-        { id: 4, lat: 54.51480425793142, lng: 36.25236902192451, description: '', img: '', verificationAmount: 1 },
-        { id: 5, lat: 54.51317158231861, lng: 36.25183281175992, description: '', img: '', verificationAmount: 1 },
-    ])
-    const [dumpsDone, setDumpsDone] = useState([
-        { id: 6, lat: 54.51581374226371, lng: 36.2539025829952, description: '', img: '', verificationAmount: 1 },
-        { id: 7, lat: 54.5151282926582, lng: 36.252937404698955, description: '', img: '', verificationAmount: 1 },
-        { id: 8, lat: 54.515103367001224, lng: 36.253634477912904, description: '', img: '', verificationAmount: 1 },
-    ])
+    const [dumpsCurrent, setDumpsCurrent] = useState([])
+    const [dumpsNew, setDumpsNew] = useState([])
+    const [dumpsDone, setDumpsDone] = useState([])
+
+    useEffect(() => {
+        dumpApi.getAll().then(data => {
+            console.log(data);
+            setDumpsNew(data.filter(data => data.status === 0));
+            setDumpsCurrent(data.filter(data => data.status === 1));
+            setDumpsDone(data.filter(data => data.status === 2));
+        })
+    }, [])
+
+    const handleConfirm = (id) => {
+        dumpApi.setConfirm(id).then(() => {
+            dumpApi.getAll().then(data => {
+                setDumpsNew(data.filter(data => data.status === 0));
+                setDumpsCurrent(data.filter(data => data.status === 1));
+                setDumpsDone(data.filter(data => data.status === 2));
+            })
+        })
+    }
+    const handleDone = (id) => {
+        dumpApi.setDone(id).then(() => {
+            dumpApi.getAll().then(data => {
+                setDumpsNew(data.filter(data => data.status === 0));
+                setDumpsCurrent(data.filter(data => data.status === 1));
+                setDumpsDone(data.filter(data => data.status === 2));
+            })
+        })
+    }
+    const handleDelete = (id) => {
+        dumpApi.delete(id)
+            .then(() => dumpApi.getAll())
+            .then(data => {
+                setDumpsNew(data.filter(data => data.status === 0));
+                setDumpsCurrent(data.filter(data => data.status === 1));
+                setDumpsDone(data.filter(data => data.status === 2));
+            })
+    }
 
     return (
         <div>
             <div className='Container'>
-                <h1>Админ панель</h1>
+                <h1 style={{ color: '#1a6c16', fontSize: '48pt' }}>Админ панель</h1>
                 <Form>
                     <Form.Check
                         type="switch"
@@ -55,15 +83,22 @@ const Admin = () => {
                     {isDoneShow && dumpsDone.map(dump =>
                         <Marker
                             key={dump.id}
-                            position={[dump.lat, dump.lng]}
+                            position={[Number(dump.latitude), Number(dump.longitude)]}
                         >
                             <Popup >
-                                <div style={{ maxWidth: '100vw' }}>
-                                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Id architecto nobis veritatis fuga repellat nulla expedita adipisci quo vero totam.
+                                <div style={{ width: 250 }}>
+                                    {dump.description}
                                     <br />
-                                    <img src="https://picsum.photos/200" />
+                                    <img
+                                        src={'https://losharik1713.pythonanywhere.com/' + dump.img_url} style={{ width: 200, height: 200 }} />
                                     <div className='d-flex justify-content-between'>
-                                        <Button className="mt-3" variant='danger'>Удалить</Button>
+                                        <Button
+                                            className="mt-3"
+                                            variant='danger'
+                                            onClick={() => handleDelete(dump.id)}
+                                        >
+                                            Удалить
+                                        </Button>
                                     </div>
                                 </div>
                             </Popup>
@@ -72,16 +107,27 @@ const Admin = () => {
                     {isCurrentShow && dumpsCurrent.map(dump =>
                         <Marker
                             key={dump.id}
-                            position={[dump.lat, dump.lng]}
+                            position={[Number(dump.latitude), Number(dump.longitude)]}
                         >
                             <Popup >
-                                <div style={{ maxWidth: '100vw' }}>
-                                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Id architecto nobis veritatis fuga repellat nulla expedita adipisci quo vero totam.
+                                <div style={{ maxWidth: 250 }}>
+                                    {dump.description}
                                     <br />
-                                    <img src="https://picsum.photos/200" />
+                                    <img src={'https://losharik1713.pythonanywhere.com/' + dump.img_url} style={{ width: 200, height: 200 }} />
                                     <div className='d-flex justify-content-between'>
-                                        <Button className="mt-3" variant='danger'>Удалить</Button>
-                                        <Button className="mt-3">Решить</Button>
+                                        <Button
+                                            className="mt-3"
+                                            variant='danger'
+                                            onClick={() => handleDelete(dump.id)}
+                                        >
+                                            Удалить
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleDone(dump.id)}
+                                            className="mt-3"
+                                        >
+                                            Решить
+                                        </Button>
                                     </div>
                                 </div>
                             </Popup>
@@ -91,16 +137,28 @@ const Admin = () => {
                     {isNewShow && dumpsNew.map(dump =>
                         <Marker
                             key={dump.id}
-                            position={[dump.lat, dump.lng]}
+                            position={[Number(dump.latitude), Number(dump.longitude)]}
                         >
                             <Popup >
-                                <div style={{ maxWidth: '100vw' }}>
-                                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Id architecto nobis veritatis fuga repellat nulla expedita adipisci quo vero totam.
+                                <div style={{ maxWidth: 250 }}>
+                                    {dump.description}
                                     <br />
-                                    <img src="https://picsum.photos/200" />
+                                    <img src={'https://losharik1713.pythonanywhere.com/' + dump.img_url} style={{ width: 200, height: 200 }} />
                                     <div className='d-flex justify-content-between'>
-                                        <Button className="mt-3" variant='danger'>Удалить</Button>
-                                        <Button className="mt-3">Подтвердить</Button>
+                                        <Button
+                                            className="mt-3"
+                                            variant='danger'
+                                            onClick={() => handleDelete(dump.id)}
+                                        >
+                                            Удалить
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleConfirm(dump.id)}
+                                            className="mt-3"
+
+                                        >
+                                            Подтвердить
+                                        </Button>
                                     </div>
                                 </div>
                             </Popup>

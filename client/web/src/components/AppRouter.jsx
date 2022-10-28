@@ -8,7 +8,6 @@ const AppRouter = observer(() => {
     // MOCK
     const { user } = useContext(Context);
 
-
     return (
         <Routes>
             {publicRoutes.map(route =>
@@ -20,7 +19,7 @@ const AppRouter = observer(() => {
                         <Route path={route.path} key={route.path} element={<route.component />} />
                     )
                     }
-                    {user.user.role === 'ADMIN' &&
+                    {user.user.role === 'Admin' &&
                         adminRoutes.map(route =>
                             <Route path={route.path} key={route.path} element={<route.component />} />
                         )

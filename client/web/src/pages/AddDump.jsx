@@ -3,6 +3,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from 'react-leaf
 import { Form, Button, Col, Row } from 'react-bootstrap'
 import { useEffect } from 'react'
 import { resizeTextArea } from '../utils/resizeTextArea'
+import { dumpApi } from '../http/dumpApi'
 
 const Locate = ({ setPosition }) => {
     const map = useMapEvents({
@@ -35,11 +36,12 @@ const AddDump = () => {
             e.stopPropagation();
         }
 
-
         const formData = new FormData();
-        formData.append('position', position);
-        formData.append('description', description);
-        formData.append('img', file);
+        formData.append('lat', String(position.lat));
+        formData.append('lng', String(position.lng));
+        if (description) formData.append('description', description);
+        if (file) formData.append('photo', file);
+        dumpApi.addDump(formData);
         console.log(formData);
         // Request
     }
@@ -53,8 +55,8 @@ const AddDump = () => {
     return (
         <div className='AddDump'>
             <div className='Container'>
-                <h1>Отправить информацию о незаконной свалке</h1>
-                <h3>1. Местоположение свалки</h3>
+                <h1 style={{ color: '#1a6c16', fontSize: '48pt' }}>Отправить информацию о незаконной свалке</h1>
+                <div style={{ fontSize: '20pt' }}>Местоположение свалки</div>
                 <MapContainer
                     ref={mapRef}
                     center={[54.514635, 36.252962]}
@@ -85,19 +87,16 @@ const AddDump = () => {
                     <Locate setPosition={setPosition} />
                 </MapContainer>
                 <div className='d-flex flex-row-reverse mt-3'>
-                    <Button onClick={() => mapRef.current.locate()}>
-                        Найти меня на карте 🤔
+                    <Button style={{ background: '#3aaa35' }} onClick={() => mapRef.current.locate()}>
+                        Найти меня на карте
                     </Button>
                 </div>
 
-                <h3 className='mt-4'>2. Информация о свалке</h3>
+                <div style={{ fontSize: '20pt', color: '#1a6c16', fontWeight: 500 }}>Описание</div>
 
                 <Form onSubmit={addDump}>
                     <Form.Group as={Row} className="mb-3">
-                        <Form.Label column sm="2">
-                            Описание
-                        </Form.Label>
-                        <Col sm="10">
+                        <Col sm="12">
                             <Form.Control
                                 required
                                 style={{ resize: 'none !important' }}
@@ -109,7 +108,7 @@ const AddDump = () => {
                         </Col>
                     </Form.Group>
                     <Form.Group controlId="formFile" className="mb-3">
-                        <Form.Label>Прикрепите фото свалки</Form.Label>
+                        <div style={{ fontSize: '20pt', color: '#1a6c16', fontWeight: 500 }}>Прикрепите фото</div>
                         <Form.Control
                             required
                             accept=".jpg,.png"
@@ -117,8 +116,8 @@ const AddDump = () => {
                             type="file"
                         />
                     </Form.Group>
-                    <div className='d-flex flex-row-reverse'>
-                        <Button type='submit'>Отправить 🔥</Button>
+                    <div className='d-flex flex-row-reverse' >
+                        <Button type='submit' style={{ background: '#3aaa35' }}>Отправить </Button>
                     </div>
                 </Form>
             </div>

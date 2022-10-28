@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { MapContainer, Marker, TileLayer, useMapEvents, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 
 import L from 'leaflet';
+import { Modal } from 'react-bootstrap';
+import { useEffect } from 'react';
+import { dumpApi } from '../http/dumpApi';
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -13,24 +16,27 @@ L.Icon.Default.mergeOptions({
 });
 
 const Main = () => {
-    const dumps = [
-        { id: 0, lat: 54.515427399355154, lng: 36.24768254508607, description: '', img: '', verificationAmount: 1 },
-        { id: 1, lat: 54.51507844132908, lng: 36.25071749461759, description: '', img: '', verificationAmount: 1 },
-        { id: 2, lat: 54.5137573589381, lng: 36.24701764448197, description: '', img: '', verificationAmount: 1 },
-        { id: 3, lat: 54.51338345993791, lng: 36.24993462777728, description: '', img: '', verificationAmount: 1 },
-        { id: 4, lat: 54.51480425793142, lng: 36.25236902192451, description: '', img: '', verificationAmount: 1 },
-        { id: 5, lat: 54.51317158231861, lng: 36.25183281175992, description: '', img: '', verificationAmount: 1 },
-        { id: 6, lat: 54.51581374226371, lng: 36.2539025829952, description: '', img: '', verificationAmount: 1 },
-        { id: 7, lat: 54.5151282926582, lng: 36.252937404698955, description: '', img: '', verificationAmount: 1 },
-        { id: 8, lat: 54.515103367001224, lng: 36.253634477912904, description: '', img: '', verificationAmount: 1 },
-        { id: 9, lat: 54.51476063767573, lng: 36.25354868428658, description: '', img: '', verificationAmount: 1 }
-    ]
+    const [dumps, setDumps] = useState([]);
+    useEffect(() => {
+        dumpApi.getCurrent().then(data => {
+            setDumps(data);
+            console.log(data);
+        })
+    }, [])
+    const [modalOpen, setModalOpen] = useState(false);
+    const [dumpId, setDumpId] = useState(false);
+
+    const handleModalOpen = (id) => {
+        setModalOpen(true);
+        setDumpId(id);
+        console.log('qweqwe')
+    }
 
     return (
         <div className='Main'>
             <div className='Container'>
-                <div className='mb-4'>
-                    <h1>Главная</h1>
+                <div className='mb-4' style={{ fontSize: '20pt' }}>
+                    <h1 style={{ color: '#1a6c16', fontSize: '48pt' }}>Главная</h1>
                     На карте обозначены незаконные свалки, вы можете прислать информацию о незаконной свалке, которую вы обнаружили!
                     <br />
                     После того, как ваша заявка пройдет модерацию, все узнают о незаконной свалке
@@ -40,16 +46,11 @@ const Main = () => {
                     {dumps.map(dump =>
                         <Marker
                             key={dump.id}
-                            position={[dump.lat, dump.lng]}
+                            position={[Number(dump.latitude), Number(dump.longitude)]}
+                            eventHandlers={{
+                                click: () => handleModalOpen(dump.id),
+                            }}
                         >
-                            <Popup >
-                                <div style={{ maxWidth: 200 }}>
-                                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Id architecto nobis veritatis fuga repellat nulla expedita adipisci quo vero totam.
-                                    <br />
-                                    <img src="https://picsum.photos/200" />
-                                </div>
-
-                            </Popup>
                         </Marker>
                     )}
                     <TileLayer
@@ -57,8 +58,18 @@ const Main = () => {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                 </MapContainer>
-                <h2>Lorem</h2>
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Id architecto nobis veritatis fuga repellat nulla expedita adipisci quo vero totam.
+                {modalOpen &&
+                    <Modal onHide={() => setModalOpen(false)} show={true}>
+                        <div className='p-4'>
+                            {dumps.find(dump => dump.id === dumpId).description}
+                            <br />
+                            <img style={{ width: '100%' }} src={'https://losharik1713.pythonanywhere.com/' + dumps.find(dump => dump.id === dumpId).img_url} className='mt-3' />
+                        </div>
+                    </Modal>
+                }
+                <div className='mt-4' style={{ fontSize: '20pt' }}>
+                    Отмечая незаконные свалки, вы вносите большой вклад в благоустройство Калужской области!
+                </div>
             </div>
 
         </div>

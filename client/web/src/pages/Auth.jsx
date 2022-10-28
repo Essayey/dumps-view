@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { Button, Card, Col, Form, Row } from 'react-bootstrap'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Context } from '..';
+import { userApi } from '../http/userApi';
 import { LOGIN_ROUTE, MAIN_ROUTE, REGISTRATION_ROUTE } from '../utils/consts';
 
 const Auth = () => {
@@ -19,14 +20,14 @@ const Auth = () => {
     const handleSubmit = async e => {
         e.preventDefault();
         try {
-            // let data;
-            // MOCK
-            let data = { role: 'ADMIN' }
+            let data;
             if (isRegistration) {
-                // await handle registration
+                data = await userApi.registration(email, password)
+                    .then(data => user.setUser(data.sub));
             }
             else {
-                // await handle login
+                data = await userApi.login(email, password);
+                console.log(data);
             }
             user.setUser(data);
             user.setIsAuth(true);
@@ -77,7 +78,7 @@ const Auth = () => {
                                 />
                             }
                             <div className='d-flex justify-content-center mt-3'>
-                                <Button type='submit'>
+                                <Button type='submit' variant="success">
                                     {isRegistration
                                         ? 'Зарегистрироваться 🤩'
                                         : 'Войти 😎'
